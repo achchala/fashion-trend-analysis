@@ -9,15 +9,12 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 from collections import Counter, defaultdict
 import re
 
-# Download required NLTK data
 nltk.download("punkt")
 nltk.download("stopwords")
 nltk.download("vader_lexicon")
 
-# Load spaCy model
 nlp = spacy.load("en_core_web_sm")
 
-# Initialize sentiment analyzer
 sia = SentimentIntensityAnalyzer()
 
 # Custom fashion-related entity patterns
@@ -39,14 +36,12 @@ class FashionTrendAnalyzer:
     def extract_entities(self, text):
         doc = nlp(text)
 
-        # Extract named entities
         for ent in doc.ents:
             if ent.label_ == "ORG":
                 self.brands[ent.text.lower()] += 1
             elif ent.label_ == "PERSON":
                 self.designers[ent.text.lower()] += 1
 
-        # Extract garment types using regex
         for pattern in fashion_patterns:
             matches = re.finditer(pattern, text.lower())
             for match in matches:
@@ -100,11 +95,9 @@ def main():
                 if article_text:
                     content = article_text.get_text(strip=True)
 
-                    # Analyze the content
                     analyzer.extract_entities(content)
                     sentiment = analyzer.analyze_sentiment(content)
 
-                    # Update trend scores for found entities
                     for brand in analyzer.brands:
                         analyzer.update_trend_scores(brand, sentiment)
                     for designer in analyzer.designers:
@@ -119,8 +112,13 @@ def main():
             except Exception as e:
                 print(f"Error processing article {link}: {str(e)}")
 
-    # Print analysis results
-    print("\n=== Fashion Trend Analysis ===")
+    return analyzer
+
+
+if __name__ == "__main__":
+    analyzer = main()
+
+    print("\nFashion Trend Analysis")
 
     print("\nTop Brands:")
     for brand, count in analyzer.brands.most_common(10):
@@ -149,7 +147,3 @@ def main():
         print(f"  Trend Strength: {metrics['trend_strength']:.2f}")
         print(f"  Frequency: {metrics['frequency']}")
         print(f"  Average Sentiment: {metrics['average_sentiment']:.2f}")
-
-
-if __name__ == "__main__":
-    main()
